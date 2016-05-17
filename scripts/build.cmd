@@ -40,7 +40,7 @@ echo Packing...
 echo Creating deploy dir %deploydir%
 mkdir %deploydir%
 
-%nuget% pack %nuspecfile& -OutputDirectory %deploydir% -Version %version%
+%nuget% pack %nuspecfile% -OutputDirectory %deploydir% -Version %version%
 
 echo Tagging...
 
