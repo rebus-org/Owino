@@ -1,12 +1,16 @@
 @echo off
 
+set projectname=Owino
+
 set version=%1
 set currentdir=%~dp0
 set root=%currentdir%\..
 set toolsdir=%root%\tools
 set nuget=%toolsdir%\NuGet\NuGet.exe
-set swindlerdir=%root%\Swindler
-set releasedir=%swindlerdir%\bin\Release
+set projectdir=%root%\%projectname%
+set projectfile=%projectdir%\%projectname%.csproj
+set nuspecfile=%projectdir%\%projectname%.nuspec
+set releasedir=%projectdir%\bin\Release
 set deploydir=%root%\deploy
 
 if "%version%"=="" (
@@ -15,7 +19,7 @@ if "%version%"=="" (
 	goto exit
 )
 
-echo This will build, tag, and release version %version% of Swindler.
+echo This will build, tag, and release version %version% of %projectname%.
 echo.
 echo Please make sure that all changes have been properly committed!
 pause
@@ -28,7 +32,7 @@ if exist "%deploydir%" (
 
 echo Building version %version%
 
-msbuild %swindlerdir%\Swindler.csproj /p:Configuration=Release
+msbuild %projectfile% /p:Configuration=Release
 
 
 echo Packing...
@@ -36,7 +40,7 @@ echo Packing...
 echo Creating deploy dir %deploydir%
 mkdir %deploydir%
 
-%nuget% pack %swindlerdir%\Swindler.nuspec -OutputDirectory %deploydir% -Version %version%
+%nuget% pack %nuspecfile& -OutputDirectory %deploydir% -Version %version%
 
 echo Tagging...
 
