@@ -24,6 +24,9 @@ namespace Owino.Extensions
             token.Register(disposable.Dispose);
         }
 
+        /// <summary>
+        /// Detects whether the request is using the http scheme, redirecting to the appropriate https route if necessary
+        /// </summary>
         public static void ForceHttps(this IAppBuilder appBuilder)
         {
             appBuilder.Use((context, next) =>
