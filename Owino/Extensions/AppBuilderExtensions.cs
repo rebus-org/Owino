@@ -23,5 +23,23 @@ namespace Owino.Extensions
 
             token.Register(disposable.Dispose);
         }
+
+        public static void ForceHttps(this IAppBuilder appBuilder)
+        {
+            appBuilder.Use((context, next) =>
+            {
+                var requestUri = context.Request.Uri;
+
+                if (requestUri.Scheme == "http")
+                {
+                    var port = requestUri.Port;
+                    var httpsUrl = $"https://{requestUri.Host}:{port}{requestUri.PathAndQuery}";
+
+                    context.Response.Redirect(httpsUrl);
+                }
+
+                return next();
+            });
+        }
     }
 }
