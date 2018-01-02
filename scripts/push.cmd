@@ -14,28 +14,35 @@ if not exist "%destination%" (
   echo Could not find %destination%
   echo.
   echo Did you remember to build the packages before running this script?
-  goto exit_fail
 )
 
-set nugetfolder=%daxrebusnuggierepopath%
+set nuget=%reporoot%\tools\NuGet\NuGet.exe
 
-if "%nugetfolder%"=="" (
-  echo Value of the environment variable 'daxrebusnuggierepopath' is not set.
+if not exist "%nuget%" (
+  echo Could not find NuGet here:
   echo.
-  echo Please remember to set the value to the path of the NuGet repository folder
-  echo that the package must be copied to.
-  echo.
-  echo For example, on my machine that path is
-  echo.
-  echo "C:\Users\mhg\Dropbox (d60)\dax-rebus-nuggierepo"
+  echo    "%nuget%"
   echo.
   goto exit_fail
 )
 
-copy "%destination%\*.%version%.nupkg" "%nugetfolder%"
 
-goto exit_success
+"%nuget%" push "%destination%\*.%version%.nupkg" -Source https://www.nuget.org/api/v2/package
+if %ERRORLEVEL% neq 0 (
+  echo NuGet push failed.
+  goto exit_fail
+)
+
+
+goto exit
+
+
 
 :exit_fail
+
+echo An error occurred.
 exit /b 1
-:exit_success
+
+
+
+:exit
