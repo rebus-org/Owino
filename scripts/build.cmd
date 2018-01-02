@@ -1,53 +1,66 @@
 @echo off
 
-set projectname=Owino
-
-set version=%1
-set currentdir=%~dp0
-set root=%currentdir%\..
+set scriptsdir=%~dp0
+set root=%scriptsdir%\..
 set toolsdir=%root%\tools
-set nuget=%toolsdir%\NuGet\NuGet.exe
-set projectdir=%root%\%projectname%
-set projectfile=%projectdir%\%projectname%.csproj
-set nuspecfile=%projectdir%\%projectname%.nuspec
-set releasedir=%projectdir%\bin\Release
-set deploydir=%root%\deploy
+set project=%1
+set version=%2
+set nuget=%toolsdir%\nuget\nuget.exe
+set msbuild=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\MSBuild.exe
+
+
+if "%project%"=="" (
+	echo Please invoke the build script with a project name as its first argument.
+	echo.
+	goto exit_fail
+)
 
 if "%version%"=="" (
-	echo Please specify which version to build as a parameter.
+	echo Please invoke the build script with a version as its second argument.
 	echo.
-	goto exit
+	goto exit_fail
 )
 
-echo This will build, tag, and release version %version% of %projectname%.
-echo.
-echo Please make sure that all changes have been properly committed!
-pause
-
-
-if exist "%deploydir%" (
-	echo Cleaning up old deploy dir %deploydir%
-	rd %deploydir% /s/q
+if not exist "%nuget%" (
+	echo This script expects to find nuget.exe here:
+	echo.
+	echo "%nuget%"
+	echo.
+	goto exit_fail
 )
 
-echo Building version %version%
+if not exist "%msbuild%" (
+	echo This script expects to find msbuild.exe here:
+	echo.
+	echo "%msbuild%"
+	echo.
+	goto exit_fail
+)
 
-msbuild %projectfile% /p:Configuration=Release
+set Version=%version%
+
+pushd %root%
+
+"%nuget%" restore
+if %ERRORLEVEL% neq 0 (
+	popd
+ 	goto exit_fail
+)
+
+"%msbuild%" "%root%\%project%" /p:Configuration=Release
+if %ERRORLEVEL% neq 0 (
+	popd
+ 	goto exit_fail
+)
+
+popd
 
 
-echo Packing...
 
-echo Creating deploy dir %deploydir%
-mkdir %deploydir%
 
-%nuget% pack %nuspecfile% -OutputDirectory %deploydir% -Version %version%
 
-echo Tagging...
 
-git tag %version%
-
-echo Pushing to NuGet.org...
-
-%nuget% push %deploydir%\*.nupkg -Source https://api.nuget.org/v3/index.json
-
-:exit
+goto exit_success
+:exit_fail
+exit /b 1
+:exit_success
