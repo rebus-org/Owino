@@ -16,12 +16,16 @@ namespace Owino.Extensions
         /// </summary>
         public static void RegisterForDisposal(this IAppBuilder appBuilder, IDisposable disposable)
         {
-            if (!appBuilder.Properties.ContainsKey(AppDisposingKey)) return;
-
-            var token = (CancellationToken)appBuilder.Properties[AppDisposingKey];
-            if (token == CancellationToken.None) return;
-
-            token.Register(disposable.Dispose);
+            if (appBuilder.Properties.ContainsKey(AppDisposingKey))
+            {
+                if (appBuilder.Properties[AppDisposingKey] is CancellationToken token)
+                {
+                    if (token != CancellationToken.None)
+                    {
+                        token.Register(disposable.Dispose);
+                    }
+                }
+            }
         }
 
         /// <summary>
