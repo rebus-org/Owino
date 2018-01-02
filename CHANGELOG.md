@@ -4,7 +4,7 @@
 
 * Made Owino
 
-## 1.0.1
+## 1.0.2
 
 * Invert a couple of ifs - thanks [mcb2001]
 
